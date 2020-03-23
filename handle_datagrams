@@ -1,0 +1,84 @@
+// Code to handle multiple segments and checking the connection Id
+// This is not a fully executable piece of code. These are just a few fragments of code 
+
+//Connection
+typedef struct {
+	FILE* fp;
+	uint32_t client_seq_num;
+	uint32_t server_seq_num;
+	bool needs_ack;
+	bool is_closing;
+} Connection;
+// Status of the Packet
+enum class PacketStatus {
+	Reply,
+	Drop,
+	Accept
+};
+
+std::map<uint16_t, Connection> connections;
+
+//check if the connection ID is there
+PacketStatus update_connection_state(Packet& p) {
+	uint16_t conn_id = p.conn_id;
+
+	auto it = connections.find(conn_id);
+	if (it == connections.end()) {
+		// Id not found
+		if ()//to do complete if condition to check for SYN flag
+			{
+			conn_id = curr_max_id + 1;
+
+			Connection c = (Connection) {.fp = nullptr, .client_seq_num = p.seq_num+1, .server_seq_num = 4321, .needs_ack = true};
+
+			connections[conn_id] = c;
+			curr_max_id++;
+                  // todo add connection id to packet send reply
+		}
+	}
+	else {
+		// Id found
+		if (p.seq_num == it->second.client_seq_num) {
+			// to do Received FIN packet
+
+			// Received handshake ACK
+			//else if () { // to do complete if condition check for ACKnowledgement flag
+				// std::cout << "Received handshake ack\n";
+				if (p.ack_num == it->second.server_seq_num + 1) {
+					//to do
+					// Create file
+					// replace file_dir with you created dir name
+					std::string filename = file_dir + "/" + std::to_string(conn_id) + ".file";
+					FILE *fp = fopen(filename.c_str(), "w+");
+					if (fp == nullptr) send_error("Failed creating new file.");
+					it->second.fp = fp;
+
+					it->second.server_seq_num = p.ack_num;
+					it->second.needs_ack = false;
+					//to do return
+				}
+			}
+			// todo Received FIN/ACK ACK
+
+
+			//to do Received no ACK, w/ or w/o payload
+
+		}
+	}
+}
+
+
+
+while (1) {
+    	memset(buffer, 0, sizeof(buffer));
+
+    	if ((num_bytes = recvfrom(sock_fd, buffer, MAX_PACKET_SIZE, 0, (struct sockaddr*)&client, &client_len)) <= 0) {
+    		send_error("Packet receiving error occurred.");
+    	}
+
+		Packet recv = Packet(buffer, num_bytes);
+
+		PacketStatus ps = update_connection_state(recv);
+}
+
+// todo based on packet status build and handle response

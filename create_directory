@@ -1,0 +1,9 @@
+// Creating a directory and checking if there is an error while creating it.
+
+
+
+const int dir_err = mkdir(dirName, 0777);
+    if (-1 == dir_err)
+    {
+        printf("Error creating directory!n");
+    }
